@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'Quiz Detail' %></title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <i class="bi bi-journal-check"></i> Quiz Management
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="/quizzes">
+                <i class="bi bi-list-check"></i> Quizzes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/questions">
+                <i class="bi bi-question-circle"></i> Questions
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container my-4">
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h4 class="mb-0"><%= quiz.title %></h4>
+              <div>
+                <a
+                  href="/quizzes/<%= quiz._id %>/edit"
+                  class="btn btn-warning btn-sm"
+                >
+                  <i class="bi bi-pencil"></i> Edit
+                </a>
+                <form
+                  action="/quizzes/<%= quiz._id %>?_method=DELETE"
+                  method="POST"
+                  class="d-inline"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                    onclick="return confirm('Are you sure?')"
+                  >
+                    <i class="bi bi-trash"></i> Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted">
+                <%= quiz.description || 'No description' %>
+              </p>
+
+              <div class="mt-4">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h5>
+                    Questions (<%= quiz.questions ? quiz.questions.length : 0
+                    %>)
+                  </h5>
+                  <a
+                    href="/quizzes/<%= quiz._id %>/add-questions"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <i class="bi bi-plus-circle"></i> Add Questions
+                  </a>
+                </div>
+
+                <% if (quiz.questions && quiz.questions.length > 0) { %>
+                <div class="list-group">
+                  <% quiz.questions.forEach((question, index) => { %>
+                  <div class="list-group-item">
+                    <div
+                      class="d-flex justify-content-between align-items-start"
+                    >
+                      <div class="flex-grow-1">
+                        <h6 class="mb-2">
+                          <span class="badge bg-secondary me-2"
+                            ><%= index + 1 %></span
+                          >
+                          <%= typeof question === 'object' ? question.text :
+                          'Question ID: ' + question %>
+                        </h6>
+
+                        <% if (typeof question === 'object' && question.options)
+                        { %>
+                        <ul class="list-unstyled mb-2">
+                          <% question.options.forEach((option, optIndex) => { %>
+                          <li
+                            class="<%= optIndex === question.correctAnswerIndex ? 'text-success fw-bold' : '' %>"
+                          >
+                            <%= String.fromCharCode(65 + optIndex) %>. <%=
+                            option %> <% if (optIndex ===
+                            question.correctAnswerIndex) { %>
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <% } %>
+                          </li>
+                          <% }); %>
+                        </ul>
+                        <% } %> <% if (typeof question === 'object' &&
+                        question.keywords && question.keywords.length > 0) { %>
+                        <div class="mt-2">
+                          <% question.keywords.forEach(keyword => { %>
+                          <span class="badge bg-info text-dark me-1"
+                            ><%= keyword %></span
+                          >
+                          <% }); %>
+                        </div>
+                        <% } %>
+                      </div>
+
+                      <% if (typeof question === 'object') { %>
+                      <a
+                        href="/questions/<%= question._id %>"
+                        class="btn btn-sm btn-outline-secondary ms-2"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <% } %>
+                    </div>
+                  </div>
+                  <% }); %>
+                </div>
+                <% } else { %>
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle"></i> No questions added yet.
+                  Click "Add Questions" to get started.
+                </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Quiz Information</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-5">Quiz ID:</dt>
+                <dd class="col-sm-7"><code><%= quiz._id %></code></dd>
+
+                <dt class="col-sm-5">Total Questions:</dt>
+                <dd class="col-sm-7">
+                  <%= quiz.questions ? quiz.questions.length : 0 %>
+                </dd>
+
+                <dt class="col-sm-5">Created:</dt>
+                <dd class="col-sm-7">
+                  <%= new Date(quiz.createdAt).toLocaleDateString() %>
+                </dd>
+
+                <dt class="col-sm-5">Updated:</dt>
+                <dd class="col-sm-7">
+                  <%= new Date(quiz.updatedAt).toLocaleDateString() %>
+                </dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="card mt-3">
+            <div class="card-body">
+              <h6 class="card-title">Quick Actions</h6>
+              <div class="d-grid gap-2">
+                <a
+                  href="/quizzes/<%= quiz._id %>/add-questions"
+                  class="btn btn-outline-primary btn-sm"
+                >
+                  <i class="bi bi-plus-circle"></i> Add More Questions
+                </a>
+                <a href="/quizzes" class="btn btn-outline-secondary btn-sm">
+                  <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+      <div class="container">
+        <p class="mb-0">
+          &copy; 2024 Quiz Management Application. All rights reserved.
+        </p>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
